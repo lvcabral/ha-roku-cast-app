@@ -1,0 +1,10 @@
+title=Home Assistant Cast
+major_version=1
+minor_version=0
+build_version=0
+splash_min_time=3000
+splash_color=#FFFFFFFF
+mm_icon_focus_fhd=pkg:/locale/default/images/home-assistant-fhd-icon.png
+mm_icon_focus_hd=pkg:/locale/default/images/home-assistant-hd-icon.png
+splash_screen_fhd=pkg:/locale/default/images/home-assistant-fhd-splash.png
+splash_screen_hd=pkg:/locale/default/images/home-assistant-hd-splash.png
