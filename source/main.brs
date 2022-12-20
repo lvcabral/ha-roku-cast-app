@@ -1,6 +1,10 @@
-' ******
-' ****** Home Assistant Stream Channel
-' ******
+' *---------------------------------------------------------------------------------------------
+' *  Roku Home Assistant Cast App (https://github.com/lvcabral/ha-roku-cast-app)
+' *
+' *  Copyright (c) 2022 Marcelo Lv Cabral. All Rights Reserved.
+' *
+' *  Licensed under the MIT License. See LICENSE in the repository root for license information.
+' *---------------------------------------------------------------------------------------------
 Library "v30/bslCore.brs"
 
 function main(args)
@@ -11,10 +15,10 @@ function main(args)
     m.screen.setMessagePort(m.port)
     m.player = CreateObject("roVideoPlayer")
     m.player.SetMessagePort(m.port)
-    if invalid <> args.contentId
-        playStreaming(args.contentId)
+    if args.u <> invalid or args.contentId <> invalid
+        playStreaming(args)
     else
-        drawBackground("App started with no deep link, use HA Roku custom component to stream a camera or other media.")
+        drawBackground("App started with no deep link, use Home Assistant to stream a camera or other media.")
     end if
     streaming = false
     paused = false
@@ -41,7 +45,9 @@ function main(args)
                 paused = true
             else if event.isResumed()
                 paused = false
-            else if event.isFullResult() or event.isRequestFailed()
+            else if event.isFullResult()
+                exit while
+            else if event.isRequestFailed()
                 info = event.getInfo()
                 if invalid <> info and invalid <> info.DebugMessage
                     status = info.DebugMessage
@@ -51,13 +57,13 @@ function main(args)
                 m.player.stop()
                 streaming = false
                 paused = false
-                drawBackground(status)
+                drawBackground(status, true)
             end if
         end if
     end while
 end function
 
-sub drawBackground(status = "")
+sub drawBackground(status = "", showUrl = false)
     m.screen.Clear(0)
     m.screen.SwapBuffers()
     bmp = CreateObject("roBitmap", "pkg:/images/ha-background.png")
@@ -74,25 +80,38 @@ sub drawBackground(status = "")
         font = font_registry.GetDefaultFont(24, false, false)
         m.screen.drawText(status, 100, m.screen.getHeight()-100, color, font)
     end if
-    if invalid <> m.streamUrl
+    if invalid <> m.streamUrl and showUrl
         font = font_registry.GetDefaultFont(16, false, false)
         m.screen.drawText("ContentId: " + m.streamUrl, 100, m.screen.getHeight()-50, color, font)
     end if
     m.screen.SwapBuffers()
 end sub
 
-sub playStreaming(contentId)
-    if invalid <> contentId
-        m.streamUrl = contentId.decodeUri()
-        content = {
-            Stream: { url: m.streamUrl }
-        }
-        if m.streamUrl.right(5) = ".m3u8"
-            content.StreamFormat = "hls"
-        end if
-        m.screen.Clear(0)
-        m.screen.SwapBuffers()
-        m.player.SetContentList([content])
-        m.player.play()
+sub playStreaming(args)
+    url = args.u
+    if url = invalid
+        url = args.contentId
     end if
+    contentType = args.t
+    m.screen.Clear(0)
+    m.screen.SwapBuffers()
+
+    m.streamUrl = url.decodeUri()
+    content = {
+        Stream: { url: url }
+    }
+    if contentType <> invalid and contentType = "a"
+        content.StreamFormat = "mp3"
+        if args.songFormat <> invalid
+            content.StreamFormat = args.songFormat
+        end if
+        drawBackground(args.songName)
+    else
+        content.StreamFormat = "hls"
+        if args.videoFormat <> invalid
+            content.StreamFormat = args.videoFormat
+        end if
+    end if
+    m.player.SetContentList([content])
+    m.player.play()
 end sub
