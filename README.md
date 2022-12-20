@@ -52,6 +52,12 @@ Please note:
 
 - Make sure you replace the `IP address` below with the one your Roku device is using
 - The `contentId` parameter can contain any valid stream URL supported by Roku (hls, mp4, mkv,...) make sure you [encode it](https://www.urlencoder.io/)
+- Alternatively you can send the parameters used by the "Play On Roku" secret channel
+  - `u` - Contains the `url` for the stream
+  - `t` - Contains the type of stream: `v` for video or `a` for audio
+  - `videoFormat`: Contains the video format, for example `hls`, `mp4`
+  - `songFormat`: Contains the audio format, for example `mp3`, `wma`
+  - `songName`: Contains the name of the music/audio being played
 
 ```zsh
 curl -d '' 'http://192.168.0.74:8060/launch/dev?contentId=https%3A%2F%2Fjell.yfish.us%2Fmedia%2Fjellyfish-30-mbps-hd-h264.mkv'
